@@ -28,7 +28,11 @@ public class Interface extends javax.swing.JFrame {
     Point box3 = new Point(150,300);
     int box3_size = 100;
     
-    Point mouseStart = new Point(0,0);
+    int prevx;
+    int prevy;
+    boolean selectedBox1 = false;
+    boolean selectedBox2 = false;
+    boolean selectedBox3 = false;
     
     /**
      * Creates new form Interface
@@ -55,6 +59,9 @@ public class Interface extends javax.swing.JFrame {
         RobotFrame.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
         RobotFrame.setPreferredSize(new java.awt.Dimension(500, 500));
         RobotFrame.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                RobotFrameMouseReleased(evt);
+            }
             public void mousePressed(java.awt.event.MouseEvent evt) {
                 RobotFrameMousePressed(evt);
             }
@@ -92,9 +99,22 @@ public class Interface extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void RobotFrameMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_RobotFrameMousePressed
-        mouseStart = evt.getPoint();
-        //System.out.println(evt.getPoint());
+        prevx = evt.getX();
+        prevy = evt.getY();
+        
+        if(evt.getX() > box1.x && evt.getX() < box1.x+box1_size && evt.getY() > box1.y && evt.getY() < box1.y+box1_size)
+            selectedBox1 = true;
+        else if(evt.getX() > box2.x && evt.getX() < box2.x+box2_size && evt.getY() > box2.y && evt.getY() < box2.y+box2_size)
+            selectedBox2 = true;
+        else if(evt.getX() > box3.x && evt.getX() < box3.x+box2_size && evt.getY() > box3.y && evt.getY() < box3.y+box2_size)
+            selectedBox3 = true;
     }//GEN-LAST:event_RobotFrameMousePressed
+
+    private void RobotFrameMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_RobotFrameMouseReleased
+        selectedBox1 = false;
+        selectedBox2 = false;
+        selectedBox3 = false;
+    }//GEN-LAST:event_RobotFrameMouseReleased
 
     /**
      * @param args the command line arguments
@@ -137,6 +157,9 @@ public class Interface extends javax.swing.JFrame {
 
     class RobotWorkspace extends JPanel implements MouseMotionListener{
         
+        
+        
+        
         public RobotWorkspace(){
             addMouseMotionListener(this);
         }
@@ -158,12 +181,32 @@ public class Interface extends javax.swing.JFrame {
 
         @Override
         public void mouseDragged(MouseEvent e) {
-            if(e.getX() > box1.x && e.getX() < box1.x+box1_size && e.getY() > box1.y && e.getY() < box1.y+box1_size){
-                System.out.println(mouseStart);
-                box1.x = box1.x+(e.getX()-mouseStart.x);
-                box1.y = box1.y+(e.getY()-mouseStart.y);
-                RobotFrame.repaint();        
+            
+            if(selectedBox1){
+                if(box1.x+(e.getX()-prevx)+box1_size <= this.getWidth() && box1.y+(e.getY()-prevy)+box1_size <= this.getHeight() && box1.x+(e.getX()-prevx) >= 0 && box1.y+(e.getY()-prevy) >= 0){
+                    box1.x = box1.x+(e.getX()-prevx);
+                    box1.y = box1.y+(e.getY()-prevy);
+                }
             }
+            else if(selectedBox2){
+                if(box2.x+(e.getX()-prevx)+box2_size <= this.getWidth() && box2.y+(e.getY()-prevy)+box2_size <= this.getHeight() && box2.x+(e.getX()-prevx) >= 0 && box2.y+(e.getY()-prevy) >= 0){
+                    box2.x = box2.x+(e.getX()-prevx);
+                    box2.y = box2.y+(e.getY()-prevy);
+                }
+            }
+            else if(selectedBox3){
+                if(box3.x+(e.getX()-prevx)+box3_size <= this.getWidth() && box3.y+(e.getY()-prevy)+box3_size <= this.getHeight() && box3.x+(e.getX()-prevx) >= 0 && box3.y+(e.getY()-prevy) >= 0){
+                    box3.x = box3.x+(e.getX()-prevx);
+                    box3.y = box3.y+(e.getY()-prevy);
+                }
+            }
+            else
+                System.out.println();
+                        
+            this.repaint();
+            
+            prevx = e.getX();
+            prevy = e.getY();
         }
 
         @Override
