@@ -12,7 +12,10 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
 import javax.swing.JPanel;
 
 /**
@@ -27,18 +30,28 @@ public class Interface extends javax.swing.JFrame {
     int box2_size = 150;
     Point box3 = new Point(150,300);
     int box3_size = 100;
+    Point start = new Point(50,400);
+    int start_size = 40;
+    Point goal = new Point(400,50);
+    int goal_size = 40;
+    
+    MotionPlanner planner = new MotionPlanner();
+    ArrayList<Point> path = new ArrayList();
     
     int prevx;
     int prevy;
     boolean selectedBox1 = false;
     boolean selectedBox2 = false;
     boolean selectedBox3 = false;
+    boolean selectedStart = false;
+    boolean selectedGoal = false;
     
     /**
      * Creates new form Interface
      */
     public Interface() {
         initComponents();
+        path = planner.PlanMotion(box1, box1_size, box2, box2_size, box3, box3_size, start, start_size, goal, goal_size);
     }
 
     /**
@@ -102,18 +115,25 @@ public class Interface extends javax.swing.JFrame {
         prevx = evt.getX();
         prevy = evt.getY();
         
-        if(evt.getX() > box1.x && evt.getX() < box1.x+box1_size && evt.getY() > box1.y && evt.getY() < box1.y+box1_size)
+        if(evt.getX() > start.x && evt.getX() < start.x+start_size && evt.getY() > start.y && evt.getY() < start.y+start_size)
+            selectedStart = true;
+        else if(evt.getX() > goal.x && evt.getX() < goal.x+goal_size && evt.getY() > goal.y && evt.getY() < goal.y+goal_size)
+            selectedGoal = true;
+        else if(evt.getX() > box1.x && evt.getX() < box1.x+box1_size && evt.getY() > box1.y && evt.getY() < box1.y+box1_size)
             selectedBox1 = true;
         else if(evt.getX() > box2.x && evt.getX() < box2.x+box2_size && evt.getY() > box2.y && evt.getY() < box2.y+box2_size)
             selectedBox2 = true;
         else if(evt.getX() > box3.x && evt.getX() < box3.x+box2_size && evt.getY() > box3.y && evt.getY() < box3.y+box2_size)
             selectedBox3 = true;
+        
     }//GEN-LAST:event_RobotFrameMousePressed
 
     private void RobotFrameMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_RobotFrameMouseReleased
         selectedBox1 = false;
         selectedBox2 = false;
         selectedBox3 = false;
+        selectedStart = false;
+        selectedGoal = false;
     }//GEN-LAST:event_RobotFrameMouseReleased
 
     /**
@@ -156,10 +176,7 @@ public class Interface extends javax.swing.JFrame {
     // End of variables declaration//GEN-END:variables
 
     class RobotWorkspace extends JPanel implements MouseMotionListener{
-        
-        
-        
-        
+
         public RobotWorkspace(){
             addMouseMotionListener(this);
         }
@@ -169,6 +186,7 @@ public class Interface extends javax.swing.JFrame {
             super.paintComponent(g);
             Graphics2D g2 = (Graphics2D)g;
             
+            //Draw boxes, start and goal
             g2.setPaint(Color.red);
             g2.fill(new Rectangle2D.Double(box1.x,box1.y,box1_size,box1_size));
             
@@ -177,12 +195,37 @@ public class Interface extends javax.swing.JFrame {
             
             g2.setPaint(Color.green);
             g2.fill(new Rectangle2D.Double(box3.x,box3.y,box3_size,box3_size));
+            
+            g2.setPaint(Color.black);
+            g2.fill(new Ellipse2D.Double(start.x,start.y,start_size,start_size));
+            
+            g2.fill(new Ellipse2D.Double(goal.x,goal.y,goal_size,goal_size));
+            
+            //Draw planned path
+            GeneralPath polyline = new GeneralPath(GeneralPath.WIND_EVEN_ODD, path.size());
+            polyline.moveTo(path.get(0).x,path.get(0).y);
+            for(int i = 1; i < path.size(); i++){
+                polyline.lineTo(path.get(i).x, path.get(i).y);
+            }
+            g2.draw(polyline);
+            
         }
 
         @Override
         public void mouseDragged(MouseEvent e) {
-            
-            if(selectedBox1){
+            if(selectedStart){
+                if(start.x+(e.getX()-prevx)+start_size <= this.getWidth() && start.y+(e.getY()-prevy)+start_size <= this.getHeight() && start.x+(e.getX()-prevx) >= 0 && start.y+(e.getY()-prevy) >= 0){
+                    start.x = start.x+(e.getX()-prevx);
+                    start.y = start.y+(e.getY()-prevy);
+                }
+            }
+            else if(selectedGoal){
+                if(goal.x+(e.getX()-prevx)+goal_size <= this.getWidth() && goal.y+(e.getY()-prevy)+goal_size <= this.getHeight() && goal.x+(e.getX()-prevx) >= 0 && goal.y+(e.getY()-prevy) >= 0){
+                    goal.x = goal.x+(e.getX()-prevx);
+                    goal.y = goal.y+(e.getY()-prevy);
+                }
+            }
+            else if(selectedBox1){
                 if(box1.x+(e.getX()-prevx)+box1_size <= this.getWidth() && box1.y+(e.getY()-prevy)+box1_size <= this.getHeight() && box1.x+(e.getX()-prevx) >= 0 && box1.y+(e.getY()-prevy) >= 0){
                     box1.x = box1.x+(e.getX()-prevx);
                     box1.y = box1.y+(e.getY()-prevy);
@@ -200,13 +243,13 @@ public class Interface extends javax.swing.JFrame {
                     box3.y = box3.y+(e.getY()-prevy);
                 }
             }
-            else
-                System.out.println();
-                        
+ 
             this.repaint();
             
             prevx = e.getX();
             prevy = e.getY();
+            
+            path = planner.PlanMotion(box1, box1_size, box2, box2_size, box3, box3_size, start, start_size, goal, goal_size);
         }
 
         @Override
