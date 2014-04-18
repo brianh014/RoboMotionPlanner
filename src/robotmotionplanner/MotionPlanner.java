@@ -31,6 +31,7 @@ public class MotionPlanner {
      */
     
     public ArrayList PlanMotion(Point box1, int box1_size, Point box2, int box2_size, Point box3, int box3_size, Point start, int start_size, Point goal, int goal_size){
+       
         ArrayList<Point> path = new ArrayList();
         path.add(new Point(start.x+start_size/2,start.y+start_size/2));
         
@@ -55,7 +56,15 @@ public class MotionPlanner {
                 grid[i/20][j/20].p3 = new Point(i+20,j);
                 
                 //test the emptiness of each cell in the grid
-                grid[i/20][j/20].isFree(boxes);            
+                grid[i/20][j/20].isFree(boxes); 
+            }
+        }
+        
+        for(int j=0; j<500; j=j+20) {
+            for(int i=0; i<500; i=i+20) {
+                
+                //set neighbors of each cell (must be done after initialization of all cells)
+                grid[i/20][j/20].setNeighbors(i/20, j/20, grid);
             }
         }
         
