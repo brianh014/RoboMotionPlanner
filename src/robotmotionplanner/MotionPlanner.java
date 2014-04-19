@@ -30,10 +30,18 @@ public class MotionPlanner {
      * @return - a list containing points for the path from start to goal
      */
     
+    public int start_row;
+    public int start_col;
+    public int goal_row;
+    public int goal_col;
+    public ArrayList<Point> path = new ArrayList();
+    public Cell[][] grid;
+    public boolean target_found;
+    
     public ArrayList PlanMotion(Point box1, int box1_size, Point box2, int box2_size, Point box3, int box3_size, Point start, int start_size, Point goal, int goal_size){
        
-        ArrayList<Point> path = new ArrayList();
-        path.add(new Point(start.x+start_size/2,start.y+start_size/2));
+        path.clear();
+        path.add(new Point(goal.x+goal_size/2,goal.y+goal_size/2));
         
         //create rectangle objects for each obstacle so we can test for containment of points
         Rectangle[] boxes = new Rectangle[3];
@@ -44,34 +52,101 @@ public class MotionPlanner {
         boxes[2] = new Rectangle(box3.x, box3.y, box3_size, box3_size);
 
         //construct a grid of cells
-        Cell[][] grid = new Cell[25][25];
+        grid = new Cell[25][25];
         
-        for(int j=0; j<500; j=j+20) {
-            for(int i=0; i<500; i=i+20) {
+        for(int i=0; i<500; i=i+20) {
+            for(int j=0; j<500; j=j+20) {
                 
                 grid[i/20][j/20] = new Cell();
-                grid[i/20][j/20].p0 = new Point(i,j);
-                grid[i/20][j/20].p1 = new Point(i,j+20);
-                grid[i/20][j/20].p2 = new Point(i+20,j+20);
-                grid[i/20][j/20].p3 = new Point(i+20,j);
+                grid[i/20][j/20].p0 = new Point(j,i);
+                grid[i/20][j/20].p1 = new Point(j,i+20);
+                grid[i/20][j/20].p2 = new Point(j+20,i+20);
+                grid[i/20][j/20].p3 = new Point(j+20,i);
                 
                 //test the emptiness of each cell in the grid
                 grid[i/20][j/20].isFree(boxes); 
+                grid[i/20][j/20].path_no = 0;       
+                
+                //create rectangle object to look for source or destination points in grid
+                Rectangle r = new Rectangle(grid[i/20][j/20].p0.x, grid[i/20][j/20].p0.y, 20, 20);
+                
+                if(r.contains(start)) {
+                    start_row = i/20;
+                    start_col = j/20;
+                    grid[i/20][j/20].path_no = 1;
+                }
+                
+                if(r.contains(goal)) {
+                    goal_row = i/20;
+                    goal_col = j/20;
+                }
+                
             }
         }
-        
-        for(int j=0; j<500; j=j+20) {
-            for(int i=0; i<500; i=i+20) {
+
+        for(int i=0; i<500; i=i+20) {
+            for(int j=0; j<500; j=j+20) {
                 
                 //set neighbors of each cell (must be done after initialization of all cells)
                 grid[i/20][j/20].setNeighbors(i/20, j/20, grid);
             }
         }
         
-        //TODO calculate a path from start to goal
-        path.add(new Point(goal.x+goal_size/2,goal.y+goal_size/2));
+        //run the shortest path breadth first expansion to compute path
+        target_found = false;
+        int bfi = 1;
+        while(!target_found) {
+            breadthFirst(bfi);
+            bfi++;
+        }
+        target_found = false;
+        
+        //retrace through breadth first expansion to create path
+        while(bfi != 0) {
+            bfi--;
+            appendPath(bfi);          
+        }
         
         return path;
     }
     
+    
+    public void breadthFirst(int bfi) {
+        
+        for(int i=0; i<500; i=i+20) {
+            for(int j=0; j<500; j=j+20) {
+                
+                if(grid[i/20][j/20].path_no == bfi) {
+                    
+                    for(int k=0; k<grid[i/20][j/20].neighbors.size(); ++k) {
+
+                       if((grid[i/20][j/20].neighbors.get(k).path_no == 0) && grid[i/20][j/20].free) {
+
+                           grid[i/20][j/20].neighbors.get(k).path_no = grid[i/20][j/20].path_no + 1;
+                           
+                           if((i/20 == goal_row) && (j/20 == goal_col)) {
+                               target_found = true;
+                               goal_row = i/20;
+                               goal_col = j/20;
+                           }
+                       }
+                   }                   
+                }
+            }
+        }
+    }
+    
+    public void appendPath(int bfi) {
+        
+        for(int i=0; i<grid[goal_row][goal_col].neighbors.size(); ++i) {
+            
+            if(grid[goal_row][goal_col].neighbors.get(i).path_no == bfi) {
+                
+                goal_row = grid[goal_row][goal_col].neighbors.get(i).p0.y/20;
+                goal_col = grid[goal_row][goal_col].neighbors.get(i).p0.x/20;
+                path.add(new Point((goal_col*20)+10,(goal_row*20)+10));
+                return;
+            }          
+        }
+    }
 }

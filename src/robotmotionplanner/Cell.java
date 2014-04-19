@@ -20,6 +20,7 @@ public class Cell {
     public Point p0, p1, p2, p3;
     public boolean free;
     public Vector<Cell> neighbors = new Vector<>();
+    public int path_no;
 
     //sets the variable "free" to true if the cell has no part of any box inside it
     public void isFree(Rectangle[] boxes) {
