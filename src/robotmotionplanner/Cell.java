@@ -51,6 +51,54 @@ public class Cell {
             neighbors.add(grid[row+1][column+1]);
             neighbors.add(grid[row+1][column-1]);
             neighbors.add(grid[row-1][column+1]);        
+        } else if((row == 0) && (column == 0)){
+            
+            neighbors.add(grid[row][column+1]);
+            neighbors.add(grid[row+1][column]);
+            neighbors.add(grid[row+1][column+1]);
+        } else if((row == 0) && (column == 24)){
+            
+            neighbors.add(grid[row][column-1]);
+            neighbors.add(grid[row+1][column]);
+            neighbors.add(grid[row+1][column-1]);
+        } else if((row == 24) && (column == 0)){
+            
+            neighbors.add(grid[row-1][column]);
+            neighbors.add(grid[row][column+1]);
+            neighbors.add(grid[row-1][column+1]);
+        } else if((row == 24) && (column == 24)){
+            
+            neighbors.add(grid[row-1][column]);
+            neighbors.add(grid[row][column-1]);
+            neighbors.add(grid[row-1][column-1]);
+        } else if(row == 0){
+            
+            neighbors.add(grid[row][column-1]);
+            neighbors.add(grid[row][column+1]);
+            neighbors.add(grid[row+1][column]);
+            neighbors.add(grid[row+1][column-1]);
+            neighbors.add(grid[row+1][column+1]);
+        } else if(row == 24){
+            
+            neighbors.add(grid[row][column-1]);
+            neighbors.add(grid[row][column+1]);
+            neighbors.add(grid[row-1][column]);
+            neighbors.add(grid[row-1][column-1]);
+            neighbors.add(grid[row-1][column+1]);
+        } else if(column == 0){
+            
+            neighbors.add(grid[row-1][column]);
+            neighbors.add(grid[row-1][column+1]);
+            neighbors.add(grid[row][column+1]);
+            neighbors.add(grid[row+1][column+1]);
+            neighbors.add(grid[row+1][column]);
+        } else if(column == 24){
+            
+            neighbors.add(grid[row-1][column]);
+            neighbors.add(grid[row-1][column-1]);
+            neighbors.add(grid[row][column-1]);
+            neighbors.add(grid[row+1][column-1]);
+            neighbors.add(grid[row+1][column]);
         }
     }
 }

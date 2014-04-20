@@ -70,7 +70,7 @@ public class MotionPlanner {
                 //create rectangle object to look for source or destination points in grid
                 Rectangle r = new Rectangle(grid[i/20][j/20].p0.x, grid[i/20][j/20].p0.y, 20, 20);
                 
-                if(r.contains(start)) {
+                if(r.contains(start.x+20, start.y+20)) {
                     start_row = i/20;
                     start_col = j/20;
                     grid[i/20][j/20].path_no = 1;
@@ -83,7 +83,14 @@ public class MotionPlanner {
                 
             }
         }
-
+        for(int i=0; i<25; ++i){
+            for(int j=0; j<25; ++j){
+                System.out.print(grid[i][j].free);
+            }
+             System.out.println("");
+        }
+         System.out.println("\n");
+         
         for(int i=0; i<500; i=i+20) {
             for(int j=0; j<500; j=j+20) {
                 

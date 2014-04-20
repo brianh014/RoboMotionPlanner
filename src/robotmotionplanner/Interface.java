@@ -95,10 +95,9 @@ public class Interface extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(RobotFrame, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(0, 20, Short.MAX_VALUE)
+                .addComponent(RobotFrame, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -201,6 +200,12 @@ public class Interface extends javax.swing.JFrame {
             
             g2.fill(new Ellipse2D.Double(goal.x,goal.y,goal_size,goal_size));
             
+            for(int i=20; i<500; i+=20){
+               g2.drawLine(0, i, 500, i); 
+            }
+            for(int i=20; i<500; i+=20){
+               g2.drawLine(i, 0, i, 500); 
+            }
             //Draw planned path
             GeneralPath polyline = new GeneralPath(GeneralPath.WIND_EVEN_ODD, path.size());
             polyline.moveTo(path.get(0).x,path.get(0).y);
