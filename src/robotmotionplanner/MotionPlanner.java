@@ -9,7 +9,7 @@ package robotmotionplanner;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.ArrayList;
-
+import java.util.*;
 /**
  *
  * @author Brian
@@ -37,6 +37,7 @@ public class MotionPlanner {
     public ArrayList<Point> path = new ArrayList();
     public Cell[][] grid;
     public boolean target_found;
+    //Queue<Cell> queue = new LinkedList<Cell>();
     
     public ArrayList PlanMotion(Point box1, int box1_size, Point box2, int box2_size, Point box3, int box3_size, Point start, int start_size, Point goal, int goal_size){
        
@@ -76,30 +77,25 @@ public class MotionPlanner {
                     grid[i/20][j/20].path_no = 1;
                 }
                 
-                if(r.contains(goal)) {
+                if(r.contains(goal.x+20, goal.y+20)) {
                     goal_row = i/20;
                     goal_col = j/20;
                 }
                 
             }
         }
-        for(int i=0; i<25; ++i){
-            for(int j=0; j<25; ++j){
-                System.out.print(grid[i][j].free);
-            }
-             System.out.println("");
-        }
-         System.out.println("\n");
          
-        for(int i=0; i<500; i=i+20) {
-            for(int j=0; j<500; j=j+20) {
+        for(int i=0; i<25; ++i) {
+            for(int j=0; j<25; ++j) {
                 
                 //set neighbors of each cell (must be done after initialization of all cells)
-                grid[i/20][j/20].setNeighbors(i/20, j/20, grid);
+                grid[i][j].setNeighbors(i, j, grid);
             }
         }
         
+        
         //run the shortest path breadth first expansion to compute path
+     
         target_found = false;
         int bfi = 1;
         while(!target_found) {
@@ -116,9 +112,19 @@ public class MotionPlanner {
         
         return path;
     }
-    
-    
-    public void breadthFirst(int bfi) {
+   
+   /*
+   public void breadthFirst(int bfi, int row, int column) {
+       if(target_found == false){
+        for(int i=0; i<grid[row][column].neighbors.size(); ++i){
+            if(grid[row][column].neighbors.get(i).free && (grid[row][column].neighbors.get(i).path_no == 0)){
+                grid[row][column].neighbors.get(i).path_no = grid[row][column].path_no +1;
+                queue.add(grid[row][column].neighbors.get(i));
+            }
+        }
+       } 
+   }*/
+   public void breadthFirst(int bfi) {
         
         for(int i=0; i<500; i=i+20) {
             for(int j=0; j<500; j=j+20) {
@@ -147,7 +153,7 @@ public class MotionPlanner {
         
         for(int i=0; i<grid[goal_row][goal_col].neighbors.size(); ++i) {
             
-            if(grid[goal_row][goal_col].neighbors.get(i).path_no == bfi) {
+            if(grid[goal_row][goal_col].neighbors.get(i).path_no == bfi && grid[goal_row][goal_col].neighbors.get(i).free) {
                 
                 goal_row = grid[goal_row][goal_col].neighbors.get(i).p0.y/20;
                 goal_col = grid[goal_row][goal_col].neighbors.get(i).p0.x/20;
