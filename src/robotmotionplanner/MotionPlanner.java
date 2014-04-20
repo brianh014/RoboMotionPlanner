@@ -37,20 +37,20 @@ public class MotionPlanner {
     public ArrayList<Point> path = new ArrayList();
     public Cell[][] grid;
     public boolean target_found;
-    //Queue<Cell> queue = new LinkedList<Cell>();
     
     public ArrayList PlanMotion(Point box1, int box1_size, Point box2, int box2_size, Point box3, int box3_size, Point start, int start_size, Point goal, int goal_size){
        
         path.clear();
-        path.add(new Point(goal.x+goal_size/2,goal.y+goal_size/2));
+        //path.add(new Point(goal.x+goal_size/2,goal.y+goal_size/2));
+        
         
         //create rectangle objects for each obstacle so we can test for containment of points
         Rectangle[] boxes = new Rectangle[3];
         
         //we augment each box by the robots size to create point SMPP (TODO)
-        boxes[0] = new Rectangle(box1.x, box1.y, box1_size, box1_size);
-        boxes[1] = new Rectangle(box2.x, box2.y, box2_size, box2_size);
-        boxes[2] = new Rectangle(box3.x, box3.y, box3_size, box3_size);
+        boxes[0] = new Rectangle(box1.x-20, box1.y-20, box1_size+20, box1_size+20);
+        boxes[1] = new Rectangle(box2.x-20, box2.y, box2_size+20, box2_size+20);
+        boxes[2] = new Rectangle(box3.x-20, box3.y-20, box3_size+20, box3_size+20);
 
         //construct a grid of cells
         grid = new Cell[25][25];
@@ -101,29 +101,23 @@ public class MotionPlanner {
         while(!target_found) {
             breadthFirst(bfi);
             bfi++;
+            if(bfi>1000) break;
         }
-        target_found = false;
+        
         
         //retrace through breadth first expansion to create path
-        while(bfi != 0) {
-            bfi--;
-            appendPath(bfi);          
+        if(target_found){
+            path.add(new Point(goal.x+goal_size/2,goal.y+goal_size/2));
+            while((bfi != 0)) {
+                bfi--;
+                appendPath(bfi); 
+
+            }
         }
         
         return path;
     }
-   
-   /*
-   public void breadthFirst(int bfi, int row, int column) {
-       if(target_found == false){
-        for(int i=0; i<grid[row][column].neighbors.size(); ++i){
-            if(grid[row][column].neighbors.get(i).free && (grid[row][column].neighbors.get(i).path_no == 0)){
-                grid[row][column].neighbors.get(i).path_no = grid[row][column].path_no +1;
-                queue.add(grid[row][column].neighbors.get(i));
-            }
-        }
-       } 
-   }*/
+
    public void breadthFirst(int bfi) {
         
         for(int i=0; i<500; i=i+20) {

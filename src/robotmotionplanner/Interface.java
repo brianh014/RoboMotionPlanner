@@ -201,12 +201,14 @@ public class Interface extends javax.swing.JFrame {
             g2.fill(new Ellipse2D.Double(goal.x,goal.y,goal_size,goal_size));
           
             //Draw planned path
-            GeneralPath polyline = new GeneralPath(GeneralPath.WIND_EVEN_ODD, path.size());
-            polyline.moveTo(path.get(0).x,path.get(0).y);
-            for(int i = 1; i < path.size(); i++){
-                polyline.lineTo(path.get(i).x, path.get(i).y);
+            if(path.size()>0){
+                GeneralPath polyline = new GeneralPath(GeneralPath.WIND_EVEN_ODD, path.size());
+                polyline.moveTo(path.get(0).x,path.get(0).y);
+                for(int i = 1; i < path.size(); i++){
+                    polyline.lineTo(path.get(i).x, path.get(i).y);
+                }
+                g2.draw(polyline);
             }
-            g2.draw(polyline);
             
         }
 
@@ -248,7 +250,7 @@ public class Interface extends javax.swing.JFrame {
             prevx = e.getX();
             prevy = e.getY();
             
-            path = planner.PlanMotion(box1, box1_size+20, box2, box2_size+20, box3, box3_size+20, start, start_size, goal, goal_size);
+            path = planner.PlanMotion(box1, box1_size, box2, box2_size, box3, box3_size, start, start_size, goal, goal_size);
         }
 
         @Override
