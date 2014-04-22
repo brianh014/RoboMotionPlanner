@@ -48,9 +48,9 @@ public class MotionPlanner {
         Rectangle[] boxes = new Rectangle[3];
         
         //we augment each box by the robots size to create point SMPP (TODO)
-        boxes[0] = new Rectangle(box1.x-20, box1.y-20, box1_size+20, box1_size+20);
-        boxes[1] = new Rectangle(box2.x-20, box2.y, box2_size+20, box2_size+20);
-        boxes[2] = new Rectangle(box3.x-20, box3.y-20, box3_size+20, box3_size+20);
+        boxes[0] = new Rectangle(box1.x, box1.y, box1_size, box1_size);
+        boxes[1] = new Rectangle(box2.x, box2.y, box2_size, box2_size);
+        boxes[2] = new Rectangle(box3.x, box3.y, box3_size, box3_size);
 
         //construct a grid of cells
         grid = new Cell[25][25];
@@ -104,7 +104,7 @@ public class MotionPlanner {
             if(bfi>1000) break;
         }
         
-        
+        int final_path = bfi;
         //retrace through breadth first expansion to create path
         if(target_found){
             path.add(new Point(goal.x+goal_size/2,goal.y+goal_size/2));
@@ -113,6 +113,9 @@ public class MotionPlanner {
                 appendPath(bfi); 
 
             }
+        }
+        if(final_path-1 != path.size()){
+            path.clear();
         }
         
         return path;
