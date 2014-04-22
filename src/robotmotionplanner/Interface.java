@@ -16,6 +16,9 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.ListIterator;
+import java.util.Timer;
+import java.util.TimerTask;
 import javax.swing.JPanel;
 
 /**
@@ -35,8 +38,15 @@ public class Interface extends javax.swing.JFrame {
     Point goal = new Point(400,50);
     int goal_size = 40;
     
+    Point roboPos = new Point(60,410);
+    boolean go = false;
+    int roboIndex = 0;
+    
     MotionPlanner planner = new MotionPlanner();
     ArrayList<Point> path = new ArrayList();
+    
+    int TICKRATE = 100;
+    Timer tick = new Timer();
     
     int prevx;
     int prevy;
@@ -51,7 +61,16 @@ public class Interface extends javax.swing.JFrame {
      */
     public Interface() {
         initComponents();
+        
         path = planner.PlanMotion(box1, box1_size, box2, box2_size, box3, box3_size, start, start_size, goal, goal_size);
+        if(path.size() > 0){
+            Point g = new Point(goal.x + 20, goal.y + 20);
+            Point s = new Point(start.x + 20, start.y + 20);
+            path.add(0, g);
+            path.add(s);
+        }
+        
+        tick.scheduleAtFixedRate(new TickTask(), 0, TICKRATE);
     }
 
     /**
@@ -64,6 +83,8 @@ public class Interface extends javax.swing.JFrame {
     private void initComponents() {
 
         RobotFrame = new javax.swing.JPanel();
+        go_button = new javax.swing.JButton();
+        reset_button = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -91,19 +112,43 @@ public class Interface extends javax.swing.JFrame {
             .addGap(0, 498, Short.MAX_VALUE)
         );
 
+        go_button.setText("Go");
+        go_button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                go_buttonActionPerformed(evt);
+            }
+        });
+
+        reset_button.setText("Reset");
+        reset_button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                reset_buttonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(0, 20, Short.MAX_VALUE)
-                .addComponent(RobotFrame, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(RobotFrame, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(reset_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(go_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(RobotFrame, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(go_button)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(reset_button))
+                    .addComponent(RobotFrame, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -134,6 +179,18 @@ public class Interface extends javax.swing.JFrame {
         selectedStart = false;
         selectedGoal = false;
     }//GEN-LAST:event_RobotFrameMouseReleased
+
+    private void go_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_go_buttonActionPerformed
+        go = true;
+    }//GEN-LAST:event_go_buttonActionPerformed
+
+    private void reset_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reset_buttonActionPerformed
+        go = false;
+        roboIndex = 0;
+        roboPos.x = start.x + 10;
+        roboPos.y = start.y + 10;
+        RobotFrame.repaint();
+    }//GEN-LAST:event_reset_buttonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -172,6 +229,8 @@ public class Interface extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel RobotFrame;
+    private javax.swing.JButton go_button;
+    private javax.swing.JButton reset_button;
     // End of variables declaration//GEN-END:variables
 
     class RobotWorkspace extends JPanel implements MouseMotionListener{
@@ -209,6 +268,10 @@ public class Interface extends javax.swing.JFrame {
                 }
                 g2.draw(polyline);
             }
+            
+            //Draw robot
+            g2.setPaint(Color.orange);
+            g2.fill(new Ellipse2D.Double(roboPos.x,roboPos.y,20,20));
             
         }
 
@@ -250,7 +313,15 @@ public class Interface extends javax.swing.JFrame {
             prevx = e.getX();
             prevy = e.getY();
             
+            reset_buttonActionPerformed(null);
+            
             path = planner.PlanMotion(box1, box1_size, box2, box2_size, box3, box3_size, start, start_size, goal, goal_size);
+            if(path.size() > 0){
+                Point g = new Point(goal.x + 20, goal.y + 20);
+                Point s = new Point(start.x + 20, start.y + 20);
+                path.add(0, g);
+                path.add(s);
+            }
         }
 
         @Override
@@ -260,6 +331,19 @@ public class Interface extends javax.swing.JFrame {
 
         
         
+    }
+    
+    class TickTask extends TimerTask{
+        @Override
+        public void run(){
+            
+            if(go && path.size() > 0 && roboIndex < path.size()){
+                roboPos.x = path.get(path.size() - 1 - roboIndex).x-10;
+                roboPos.y = path.get(path.size() - 1 - roboIndex).y-10;
+                RobotFrame.repaint();
+                roboIndex++;
+            }
+        }  
     }
     
 }
